@@ -1,14 +1,14 @@
-var http = require('http');
+const http = require('http');
 const express = require('express')
-const httpProxy = require('express-http-proxy')
 const app = express()
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const helmet = require('helmet');
 
-const jwt =  require('jsonwebtoken')
+const proxies = require('./proxies');
 
-const userServiceProxy = httpProxy('http://localhost:8080/users');
+const jwt =  require('jsonwebtoken')
 
 //
 function verifyJWT(req, res, next){
@@ -26,8 +26,12 @@ function verifyJWT(req, res, next){
 }
 
 // Proxy request
-app.get('/users', verifyJWT, (req, res, next) => {
-  userServiceProxy(req, res, next);
+app.get('/users', (req, res, next) => {
+  proxies.userServiceProxy(req, res, next);
+})
+
+app.post('/users', (req, res, next) => {
+  proxies.userServiceProxy(req, res, next);
 })
 
 app.use(logger('dev'));
